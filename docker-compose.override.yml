@@ -20,6 +20,13 @@ services:
       # Host ./data <-> container /data. Inputs go in data/inputs as PNG;
       # results land in data/results/{Mon_DD_YYYY}_{model}_{stack}/.
       - ./data:/data
+    # Loopback only. Upstream publishes "${BACKEND_PORT:-7001}:${BACKEND_PORT:-7001}"
+    # with no bind address, which is 0.0.0.0 — and this API has no authentication
+    # of any kind, so anyone who can reach this host on the network can spend the
+    # provider keys in .env. !override replaces the base list rather than
+    # appending to it, which is what a plain `ports:` key here would do.
+    ports: !override
+      - "127.0.0.1:${BACKEND_PORT:-7001}:${BACKEND_PORT:-7001}"
 
   frontend:
     environment:
@@ -33,3 +40,7 @@ services:
       - VITE_HTTP_BACKEND_URL=http://127.0.0.1:${BACKEND_PORT:-7001}
     depends_on:
       - backend
+    # Same reasoning, and this one is a Vite *dev* server, which is not built to
+    # face a network.
+    ports: !override
+      - "127.0.0.1:5173:5173"
