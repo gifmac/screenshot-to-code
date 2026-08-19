@@ -1,0 +1,16 @@
+# Local additions to upstream's docker-compose.yml.
+# Compose auto-loads any file named docker-compose.override.yml sitting next to
+# the base file, so plain `docker compose up -d` picks this up with no -f flags.
+#
+# Why this exists: upstream's compose declares no volumes, so everything the
+# agent generates lives inside the container and dies with it. EVALS_DIR points
+# the eval pipeline at a bind-mounted directory instead.
+
+services:
+  backend:
+    environment:
+      - EVALS_DIR=/data
+    volumes:
+      # Host ./data <-> container /data. Inputs go in data/inputs as PNG;
+      # results land in data/results/{Mon_DD_YYYY}_{model}_{stack}/.
+      - ./data:/data

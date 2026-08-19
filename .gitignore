@@ -24,3 +24,6 @@ frontend/.env.local
 
 # Walkthrough demo videos
 walkthrough/
+
+# Local runtime data (stc): screenshots in, generated HTML out
+data/
