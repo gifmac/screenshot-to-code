@@ -10,7 +10,26 @@ services:
   backend:
     environment:
       - EVALS_DIR=/data
+      # Where extract_assets writes the crops it lifts out of the screenshot.
+      # Upstream defaults this to backend/local_assets *inside* the image
+      # (backend/config.py:28), so every extracted logo and photo dies with the
+      # container and the generated HTML is left pointing at nothing. On the
+      # bind mount they outlive it and the driver can copy them next to the HTML.
+      - LOCAL_ASSET_DIR=/data/local_assets
     volumes:
       # Host ./data <-> container /data. Inputs go in data/inputs as PNG;
       # results land in data/results/{Mon_DD_YYYY}_{model}_{stack}/.
       - ./data:/data
+
+  frontend:
+    environment:
+      # Vite proxies /generate-code, /api and /local-assets to this target
+      # (frontend/vite.config.ts:11). Its default is 127.0.0.1:7001, which
+      # inside this container is the frontend itself, not the backend.
+      - PROXY_CODEGEN_BACKEND=http://backend:7001
+      # The eval pages call the backend directly rather than through the proxy
+      # (frontend/src/config.ts:19). That fetch runs in the browser, on the host,
+      # so it wants the published port — not the compose service name.
+      - VITE_HTTP_BACKEND_URL=http://127.0.0.1:${BACKEND_PORT:-7001}
+    depends_on:
+      - backend
