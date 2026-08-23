@@ -6,8 +6,9 @@ added is listed below.
 
 - **Forked from:** `d026163f586dfa8c5c10d28c36edd59a9d3b0e88` (2026-07-22)
 - **Cloned:** 2026-08-18
-- **Remote:** upstream only. `git fetch upstream && git merge upstream/main` pulls
-  improvements. There is no `origin` unless you add one.
+- **Remotes:** `origin` is the fork at <https://github.com/gifmac/screenshot-to-code>
+  (where local work is pushed); `upstream` is abi/screenshot-to-code.
+  `git fetch upstream && git merge upstream/main` pulls improvements.
 
 ## What we added
 
@@ -16,6 +17,7 @@ added is listed below.
 | `docker-compose.override.yml` | Upstream declares no volumes, so generated results die with the container. Sets `EVALS_DIR=/data` and bind-mounts `./data`. |
 | `.env` | Provider keys. Gitignored by upstream's own `.gitignore:17`. |
 | `data/` | Bind-mounted work dir: `inputs/` (PNG in), `results/` (HTML out). Gitignored. |
+| `skills/screenshot-to-code/` | The Claude skill and its `stc.mjs` driver. Versioned here so the work is backed up; see below. |
 | `README.local.md` | This file. |
 
 Nothing under `backend/` or `frontend/` is touched, so merges stay clean.
@@ -54,9 +56,17 @@ at container start rather than at compose parse.
 
 ## Headless use
 
-Normally you drive this through the `screenshot-to-code` skill
-(`~/.claude/skills/screenshot-to-code/`), which wraps the REST API below via
-`scripts/stc.mjs`. Direct calls, for reference:
+Normally you drive this through the `screenshot-to-code` skill, which wraps the REST API
+below via `skills/screenshot-to-code/scripts/stc.mjs`. The skill is versioned in this
+repo and surfaced to Claude through a directory junction, so there is one copy on disk:
+
+```powershell
+# once, from an empty ~/.claude/skills/screenshot-to-code:
+cmd /c mklink /J "$env:USERPROFILE\.claude\skills\screenshot-to-code" `
+  "$PWD\skills\screenshot-to-code"
+```
+
+Direct calls, for reference:
 
 ```bash
 curl -s localhost:7001/models                       # available models + stacks
