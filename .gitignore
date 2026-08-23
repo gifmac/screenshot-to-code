@@ -27,4 +27,5 @@ walkthrough/
 
 # Local runtime data (stc): screenshots in, generated HTML out
 data/
+stc-out/
 .gstack/
