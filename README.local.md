@@ -1,8 +1,9 @@
 # Local setup notes
 
 This is a clone of [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code)
-(MIT, Abi Raja) kept as a standalone tool. Upstream code is unmodified; everything we
-added is listed below.
+(MIT, Abi Raja) kept as a standalone tool. Upstream code is left alone wherever it can
+be; exactly two upstream files are edited, and both are listed below along with
+everything we added.
 
 - **Forked from:** `d026163f586dfa8c5c10d28c36edd59a9d3b0e88` (2026-07-22)
 - **Cloned:** 2026-08-18
@@ -317,7 +318,13 @@ grepped rather than read: `STC_READY`, `STC_PROGRESS`, `STC_ASSETS`, `STC_OUTPUT
 | `skills/screenshot-to-code/` | The Claude skill and its `stc.mjs` driver. Versioned here so the work is backed up; see below. |
 | `README.local.md` | This file. |
 
-Nothing under `backend/` or `frontend/` is touched, so merges stay clean.
+Everything above is additive, so merges stay clean apart from two upstream files this
+fork does edit:
+
+| File | Why | Conflicts if |
+|---|---|---|
+| `frontend/Dockerfile` | Upstream moved the frontend to pnpm but left the Dockerfile copying a `yarn.lock` that no longer exists, so the image would not build. Details [below](#running-it-with-docker-compose-directly). | Upstream fixes it too. |
+| `backend/prompts/system_prompt.py` | The React scaffolding listed which scripts to load but never said how to mount, so generated pages called `ReactDOM.createRoot` from the UMD build and logged a console error on every load. Now specifies an importmap plus a real `react-dom/client` import. | Upstream changes the same React block. |
 
 ## Running it with Docker Compose directly
 
@@ -342,8 +349,8 @@ video input: it takes MP4/MOV/WebM up to 30s, and nothing else does.
 pnpm in 2c35fb1 but left the Dockerfile copying a `yarn.lock` that no longer exists, so
 the target failed to build and a bare `docker compose up -d` took the backend down with
 it. It now enables corepack and installs the version pinned in `package.json`
-(`packageManager: pnpm@10.32.1`), which is the one edit in this repo outside the
-override and this file — expect a conflict there if upstream fixes it too.
+(`packageManager: pnpm@10.32.1`). It is one of the two upstream files this fork edits
+(see [What we added](#what-we-added)) — expect a conflict here if upstream fixes it too.
 
 **The first `up` builds the images and that takes a while** — `backend/Dockerfile`
 runs `poetry install` and then `playwright install --with-deps chromium`, which pulls
