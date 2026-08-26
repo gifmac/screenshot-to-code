@@ -42,10 +42,18 @@ You are a coding agent that's an expert at building front-ends.
 
 ## React
 
-- Use these script to include React so that it can run on a standalone page:
-    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+- Use these scripts to include React so that it can run on a standalone page:
     <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {"imports": {"react": "https://esm.sh/react@18?dev", "react-dom/client": "https://esm.sh/react-dom@18/client?dev"}}
+    </script>
+- Put the component code in <script type="text/babel" data-type="module"> and mount the app like this:
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    createRoot(document.getElementById('root')).render(<App />);
+- DO NOT use the react/react-dom UMD bundles with `ReactDOM.createRoot`. React 18 refuses createRoot from the `react-dom` entry point and logs `Warning: You are importing createRoot from "react-dom" which is not supported. You should instead import it from "react-dom/client".` The page still renders, so the mistake is silent unless the console is checked.
+- The `import React from 'react'` line is required: Babel 7 uses the classic JSX runtime, which compiles JSX to `React.createElement` and needs `React` in scope.
 - For babel, make sure to use https://unpkg.com/@babel/standalone@7.25.6/babel.min.js (pin this exact version — the unversioned URL now resolves to Babel 8, whose automatic JSX runtime injects an `import` that breaks in-browser transforms). DO NOT USE https://cdn.babeljs.io/babel.min.js as it is not the correct version and will cause errors.
 - Use this script to include Tailwind: <script src="https://cdn.tailwindcss.com"></script>
 
